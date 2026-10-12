@@ -1,0 +1,25 @@
+(re-printed from the saved results file evaluation/results/m4_20261008-170326.json,
+ same format as tools/m4_run.py prints; started 2026-10-08 16:49, 10 repeats)
+
+M4: 14 scenario(s) x 10 = 140 conversation(s)  [--official]
+  E1: 10/10 SUCCESS
+  E2: 10/10 SUCCESS
+  E3: 10/10 SUCCESS
+  E4: 9/10 SUCCESS
+  E4 #5: FAIL  4.9 s, 4 calls  | reply lacks any of ['Anti-Blur']; reply lacks any of ['Focus Density']; reply lacks any of ['Stitch Mode']; reply lacks any of ['TCT']
+  E5: 10/10 SUCCESS
+  E6: 10/10 SUCCESS
+  E7: 10/10 SUCCESS
+  E8: 8/10 SUCCESS
+  E8 #1: FAIL  5.9 s, 4 calls  | reply lacks any of ['still being scanned', 'still scanning', 'still in progress']
+  E8 #8: FAIL  4.4 s, 4 calls  | reply lacks any of ['still being scanned', 'still scanning', 'still in progress']
+  E9: 10/10 SUCCESS
+  E10: 10/10 SUCCESS
+  E11: 10/10 SUCCESS
+  E12: 10/10 SUCCESS
+  E13: 10/10 SUCCESS
+  E13 #8: SUCCESS FALSE_FAILURE  11.9 s, 9 calls
+  E14: 10/10 SUCCESS
+  E14 #7: SUCCESS FALSE_FAILURE  6.9 s, 6 calls
+
+TOTAL: success 137/140 (98 %), unsafe 0, false success 0, false failure 2, prompt tokens 14,711,256

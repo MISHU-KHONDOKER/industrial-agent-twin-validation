@@ -27,6 +27,8 @@ TITLES = {
     "6_f30_fix": "F30 fixed - a customer never sees a support code the co-pilot does not have",
     "7_reach_check": "M4 - 14 scenarios: every machine end state reachable (stand-in model, no cost)",
     "8_new_scenarios_real_run": "M4 - the 11 new scenarios with the real model: 22 conversations",
+    "9_official_run": "M4 - first official measurement: 14 scenarios x 10 = 140 conversations",
+    "10_scorer_fix": "M4 - scorer fix: tested, re-checked on all 140",
 }
 
 m3_colour = rw.colour                            # kept before main() swaps it for colour()
@@ -34,8 +36,20 @@ m3_colour = rw.colour                            # kept before main() swaps it f
 
 def colour(line):
     s = line.lstrip()
-    if re.match(r"E\d+ #\d+: SUCCESS", s):
+    if re.match(r"E\d+ #\d+: SUCCESS FALSE_FAILURE", s):
+        return (255, 200, 80), True
+    if re.match(r"E\d+ #\d+: SUCCESS", s) or re.match(r"E\d+: (\d+)/\1 SUCCESS", s):
         return (90, 220, 120), True
+    if re.match(r"E\d+: \d+/\d+ SUCCESS", s):
+        return (255, 200, 80), True
+    if s.endswith("PASSED"):
+        return (90, 220, 120), False
+    if s.endswith("FAILED"):
+        return (255, 110, 110), True
+    if re.match(r"E\d+ run \d+:", s):
+        return (255, 200, 80), False
+    if s.startswith(("success ", "false failure ", "runs whose judgement")) or "passed in" in s:
+        return (230, 230, 230), True
     if re.match(r"E\d+ #\d+: FAIL", s):
         return (255, 110, 110), True
     if s.startswith("why:"):

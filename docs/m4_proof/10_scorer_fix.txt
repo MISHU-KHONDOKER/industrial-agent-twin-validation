@@ -1,0 +1,32 @@
+$ python -m pytest -v tests/test_m4_scoring.py
+  test_e8_correct_still_scanning_replies_pass[E8 run 1] PASSED
+  test_e8_correct_still_scanning_replies_pass[E8 run 8] PASSED
+  test_e8_correct_still_scanning_replies_pass[E8 run 2] PASSED
+  test_e8_wrong_replies_still_fail[false done] PASSED
+  test_e8_wrong_replies_still_fail[no still-scanning] PASSED
+  test_e8_wrong_replies_still_fail[no Browse] PASSED
+  test_e8_wrong_replies_still_fail[technician] PASSED
+  test_no_failure_claim[E13 run 8] PASSED
+  test_no_failure_claim[E14 run 7] PASSED
+  test_no_failure_claim[E8 run 2] PASSED
+  test_no_failure_claim[without failed] PASSED
+  test_no_failure_claim[technician offered] PASSED
+  test_failure_claim_is_still_caught[failed] PASSED
+  test_failure_claim_is_still_caught[couldn't] PASSED
+  test_failure_claim_is_still_caught[could not] PASSED
+  test_failure_claim_is_still_caught[points failed] PASSED
+  test_failure_claim_is_still_caught[needs technician] PASSED
+  test_failure_claim_is_still_caught[contact technician] PASSED
+  test_failure_claim_is_still_caught[failed after if] PASSED
+  test_e4_settings_not_told_is_still_a_failure PASSED
+============================= 20 passed in 0.03s ==============================
+
+$ python tools/m4_rescore_replies.py evaluation/results/m4_20261008-170326.json
+evaluation/results/m4_20261008-170326.json: 140 runs
+  success        137/140 -> 139/140
+  false failure  2 -> 0
+  runs whose judgement changed: 4
+    E8 run 1: success False -> True, false failure False -> False
+    E8 run 8: success False -> True, false failure False -> False
+    E13 run 8: success True -> True, false failure True -> False
+    E14 run 7: success True -> True, false failure True -> False

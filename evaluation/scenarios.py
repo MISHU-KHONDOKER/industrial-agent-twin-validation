@@ -113,7 +113,10 @@ SCENARIOS = [
         "m1": "G4 / F13", "mode": "brightfield", "faults": ["calibration_modal"],
         "script": ["start scan", "1"],
         "expect": {"outcome": "STILL-SCANNING", "scans": 1,
-                   "reply_has": [["still being scanned", "still scanning", "still in progress"], ["Browse"]],
+                   # "currently being scanned" / "still be scanning": correct wordings the
+                   # real model used in the official run (runs 1 and 8), added 2026-10-12
+                   "reply_has": [["still being scanned", "still scanning", "still in progress",
+                                  "currently being scanned", "still be scanning"], ["Browse"]],
                    "reply_lacks": ["technician"] + NO_SUCCESS_CLAIM},
     },
     {
