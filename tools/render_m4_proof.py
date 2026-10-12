@@ -29,6 +29,8 @@ TITLES = {
     "8_new_scenarios_real_run": "M4 - the 11 new scenarios with the real model: 22 conversations",
     "9_official_run": "M4 - first official measurement: 14 scenarios x 10 = 140 conversations",
     "10_scorer_fix": "M4 - scorer fix: tested, re-checked on all 140",
+    "11_f37_fix": "F37 fixed - the customer is always told which settings were corrected (check on / off / on)",
+    "12_official_run_2": "M4 - second official measurement (test copy with F37): 139 of 140",
 }
 
 m3_colour = rw.colour                            # kept before main() swaps it for colour()
@@ -60,7 +62,9 @@ def colour(line):
         return (255, 110, 110), True
     if s.startswith(("TOTAL:", "scorer judged")) or s.endswith("scenarios reachable"):
         return (230, 230, 230), True
-    if s.startswith(("F29 fix PROVEN", "F30 fix PROVEN")) or re.match(r"\d\. (guard|check) ON", s):
+    if s.startswith("model calls") and " FAIL" in s:
+        return (255, 110, 110), True
+    if s.startswith(("F29 fix PROVEN", "F30 fix PROVEN", "F37 fix PROVEN")) or re.match(r"\d\. (guard|check) ON", s):
         return (90, 220, 120), True
     if re.match(r"\d\. (guard|check) OFF", s) or s.startswith("model calls") and "G1 BROKEN" in s:
         return (255, 110, 110), True

@@ -1,0 +1,25 @@
+PS <project>> <private>\venv\Scripts\python tools\demo_f37_fix.py <test copy with F37>
+1. check ON   (model leaves the corrected settings out, as in E4 #5)
+     customer sees: Some scanner settings were wrong, so I corrected them before scanning:
+     customer sees: - Anti-Blur: 50 → 10
+     customer sees: - Focus Density: 0 → 4
+     customer sees: - Stitch Mode: 0 → 2
+     customer sees: - [Slide] Type: Generic → TCT
+     customer sees: Your slide has been scanned. Does this scan look right to you?
+     model calls: 4  ->  E4 SUCCESS
+2. check OFF  (model leaves the corrected settings out)
+     customer sees: Your slide has been scanned. Does this scan look right to you?
+     model calls: 4  ->  E4 FAIL  | reply lacks any of ['Anti-Blur']; reply lacks any of ['Focus Density']; reply lacks any of ['Stitch Mode']; reply lacks any of ['TCT']
+3. check ON   (model lists the settings itself, as in E4 #1)
+     customer sees: Some scanner settings were wrong, so I corrected them before scanning:
+     customer sees: - Anti-Blur: 50 → 10
+     customer sees: - Focus Density: 0 → 4
+     customer sees: - Stitch Mode: 0 → 2
+     customer sees: - [Slide] Type: Generic → TCT
+     customer sees: Your slide has been scanned. Does this scan look right to you?
+     model calls: 4  ->  E4 SUCCESS
+4. check ON   (no setting was changed)
+     customer sees: Your slide has been scanned.
+     model calls: 4  ->  E1 SUCCESS
+
+F37 fix PROVEN: corrected settings reach the customer even when the model leaves them out; an answer that already has them, or a scan without changes, stays as it is
