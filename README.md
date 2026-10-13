@@ -11,12 +11,23 @@ and when it was seen), with real failures that can be switched on. On it, the **
 unchanged agent** is tested without a language model and with the real model in the
 loop — and every result is shown with the real terminal output.
 
+### Key results
+
+| | |
+|---|---|
+| **139 / 140** | customer conversations correct with the real language model in the loop (official run, 14 scenarios × 10) |
+| **0 · 0 · 0** | unsafe machine actions · false "success" claims · false "failure" claims |
+| **Twin ⇄ real** | on the real scanner the agent did what the twin predicted — and caught a real machine fault live, exactly as proven in simulation |
+| **6 defects** | found by the evaluation (3 on the twin, 3 on the real scanner) and fixed — the twin ones proven by switching the fix off on purpose |
+| **≈ ¥0.01** | per customer conversation (98 % of the prompt served from cache) |
+| **120 tests** | in CI on every push, with a leak check and a mutation test |
+
 | Milestone | What it proves |
 |---|---|
-| [M1](docs/M1_definition_of_correct.md) Define "correct" | 12 rules, pass/fail criteria for every machine action, 30 real failure modes |
+| [M1](docs/M1_definition_of_correct.md) Define "correct" | 12 rules, pass/fail criteria for every machine action, 32 real failure modes |
 | [M2](docs/M2_test_foundation.md) Test foundation | Unit tests + CI + a mutation-test proof |
 | [M3](docs/M3_virtual_instrument.md) Digital twin | 16 of 16 scenarios with the real agent, each fix proven by breaking it on purpose |
-| [M4](docs/M4_evaluation_suite.md) Evaluation suite ⏳ | Real model in the loop: success, unsafe actions, false "done" claims, cost |
+| [M4](docs/M4_evaluation_suite.md) Evaluation suite ✅ | Real model in the loop, 280 scored conversations, confirmed on the real scanner |
 
 > **What this is not:** the full scanner integration. That lives in a private
 > repository, because it controls a proprietary hardware interface and embeds
@@ -87,7 +98,7 @@ customer-mode scan has been completed end to end on real hardware.
 
 The co-pilot's safety-critical logic (configuration guards, result reading,
 geometry, focus-point choice, sample finding) is in [`copilot_core/`](copilot_core/)
-with 55 unit tests in [`tests/`](tests/), each named after the requirement it
+with 58 unit tests in [`tests/`](tests/), each named after the requirement it
 proves. See [M2 — Test foundation](docs/M2_test_foundation.md).
 
 **Proof that the tests work:** [a test that catches a real production incident](docs/demo_mutation_test.md)
@@ -121,17 +132,27 @@ including the case where the machine does not confirm the stop.
 
 Now [16 of 16 scenarios pass](docs/m3_first_runs.md).
 
-### Evaluation suite (in progress)
+### Evaluation suite ✅
 
 The [evaluation suite](docs/M4_evaluation_suite.md) puts the **real language model**
-in the loop: a customer conversation on the virtual scanner, run repeatedly, scored
-by fixed rules for success, unsafe actions, false "done" claims, correct escalation,
-time and tokens. The first real run (4 of 6) was read by hand: one gap in the virtual
-scanner (fixed, with proof), a scorer that missed an invented support code (fixed,
-with proof), and **two real findings in the agent** — scanning without asking which
-slide, and an invented support code — both now fixed in the agent's code, each proven
-by switching the fix off on purpose. Every step
-is shown with the real terminal output.
+in the loop: 14 customer conversations on the virtual scanner — a clean scan, another
+machine's settings, a scan that never ends, scrambled settings, an empty slide position,
+a frozen dialog, Chinese, the first-batch confirmation and more — each run 10 times and
+scored by fixed rules for success, unsafe actions, false claims, escalation, time and cost.
+
+- **Two official measurements: 137/140 and 139/140**, release gate (0 unsafe, 0 false
+  success) passed both times.
+- **Every failure read by hand.** Most were the scorer's mistakes, fixed only after a
+  re-check on every saved reply; the real ones became findings: **scanning without
+  asking which slide (F29), an invented support code (F30), corrected settings not told
+  (F37)** — each fixed in code and proven by switching the fix off on purpose.
+- **Confirmed on the real scanner:** the same scenarios with the same version — the agent
+  did what the twin predicted, and when the machine developed a real fault mid-test, the
+  agent caught it and handed the one unconfirmed step to a person, exactly as proven in
+  simulation.
+- **≈ ¥0.01 per conversation**, because 98 % of every prompt is served from cache.
+
+Every step is shown with the real terminal output.
 
 ### Publishing safely
 
@@ -146,9 +167,10 @@ would itself be a leak.
 The full plan, with the status of each milestone, is in
 **[ROADMAP.md](ROADMAP.md)**. Highlights:
 
-- An automated **scramble-and-recover evaluation**: settings are deliberately
-  scrambled, and I measure how reliably and how quickly the agent restores them.
-- A **small vs large model benchmark** for recognising the slide type.
+- **Large vs small models (M5):** the same evaluation suite on a large hosted model
+  and on small local models — accuracy, safety, latency and cost side by side.
+- **Red-teaming (M6):** prompt injection, misleading machine responses and unsafe
+  requests, with measured refusal rates.
 - A **risk register and EU AI Act assessment** for an AI agent that controls
   laboratory equipment.
 

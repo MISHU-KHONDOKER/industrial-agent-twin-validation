@@ -157,3 +157,38 @@ def test_merge_keeps_the_good_files_order_and_line_endings(tmp_path):
     live = write_ini(tmp_path / "live.ini", {"Setup": {"FocusDensity": "0", "StitchMode": "0"}})
     merged = cc.merge_good_with_live(str(good), cc._read_ini(live))
     assert merged == "[Setup]\r\nFocusDensity=4\r\n; a comment\r\nStitchMode=2\r\n"
+
+
+# ------------------------------------------------------------------ F23 / G7: calibration results
+
+def _with_stage_slope(config, x_of_y):
+    config["StageSlope20X"] = {"SlopeXofY": x_of_y, "SlopeYofX": "26"}
+    return config
+
+
+def test_F23_a_fresh_calibration_is_reported_never_called_wrong(tmp_path):
+    """Found on the real scanner: after a stitching calibration by hand, the co-pilot
+    treated the new calibration values as 'wrong' and put the good file's OLD ones back."""
+    live = write_ini(tmp_path / "live.ini", _with_stage_slope(base_config(), "-20"))
+    good = write_ini(tmp_path / "good.ini", _with_stage_slope(base_config(), "-19"))
+    result = cc.compare_config(live, good)
+    assert result["match"] is True                               # not a wrong setting
+    assert result["calibration_differences"] == [
+        {"section": "StageSlope20X", "key": "SlopeXofY", "live": "-20", "good": "-19"}]
+
+
+def test_F23_a_restore_keeps_the_live_calibration_and_fixes_the_rest(tmp_path):
+    live_cfg = _with_stage_slope(base_config(), "-20")
+    live_cfg["Setup"]["FocusDensity"] = "0"                       # a real wrong setting
+    live = write_ini(tmp_path / "live.ini", live_cfg)
+    good = write_ini(tmp_path / "good.ini", _with_stage_slope(base_config(), "-19"))
+    merged = cc.merge_good_with_live(good, cc._read_ini(live))
+    assert "SlopeXofY=-20" in merged and "SlopeXofY=-19" not in merged   # calibration kept
+    assert "FocusDensity=4" in merged                                     # the wrong one fixed
+
+
+def test_F23_a_calibration_key_missing_from_the_live_file_gets_the_good_value(tmp_path):
+    live = write_ini(tmp_path / "live.ini", base_config())                # no [StageSlope20X]
+    good = write_ini(tmp_path / "good.ini", _with_stage_slope(base_config(), "-19"))
+    merged = cc.merge_good_with_live(good, cc._read_ini(live))
+    assert "SlopeXofY=-19" in merged

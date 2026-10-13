@@ -1,0 +1,13 @@
+PS <project>> <private>\venv\Scripts\python tools\m4_run.py --scenarios E1,E11,E12 --repeats 3
+M4: 3 scenario(s) x 3 = 9 conversation(s)
+  E1 #1: SUCCESS  6.0 s, 4 calls, 95,435 prompt tokens
+  E1 #2: SUCCESS  5.8 s, 4 calls, 95,452 prompt tokens
+  E1 #3: SUCCESS  5.8 s, 4 calls, 95,467 prompt tokens
+  E11 #1: SUCCESS  4.4 s, 3 calls, 70,185 prompt tokens
+  E11 #2: SUCCESS  4.7 s, 3 calls, 70,171 prompt tokens
+  E11 #3: SUCCESS  4.7 s, 3 calls, 70,157 prompt tokens
+  E12 #1: SUCCESS  6.2 s, 4 calls, 95,430 prompt tokens
+  E12 #2: SUCCESS  5.5 s, 4 calls, 95,444 prompt tokens
+  E12 #3: SUCCESS  5.6 s, 4 calls, 95,432 prompt tokens
+raw results (local only): evaluation\results\m4_20261013-152248.json
+TOTAL: success 100 %, unsafe 0, false success 0, prompt tokens 783,173 (98 % cached), completion tokens 1,245

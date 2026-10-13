@@ -38,7 +38,8 @@ SCENARIOS = [
             "quality": "needs_customer",
             "scans": 1,
             "stops": 0,
-            "reply_has": [["scanned", "scan is done", "finished", "complete"]],
+            # "slide is done": the real co-pilot's finished message on the real scanner (recorded 2026-10-08)
+            "reply_has": [["scanned", "scan is done", "slide is done", "finished", "complete"]],
             "reply_lacks": ["technician", "support code", "could not", "failed"],
         },
     },

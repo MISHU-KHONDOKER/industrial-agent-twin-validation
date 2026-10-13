@@ -8,7 +8,7 @@ the same output. Each test is named after the M1 rule (`G…`) or failure mode
 (`F…`) it proves, so a failing test points straight at the requirement it breaks.
 
 ```
-python -m pytest        # 55 passed, 1 expected failure, ~8 s
+python -m pytest        # all pass, 1 expected failure (F20), ~15 s
 ```
 
 The same tests and the leak check run on GitHub Actions on every push.

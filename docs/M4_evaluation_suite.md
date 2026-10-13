@@ -1,11 +1,17 @@
 # M4 — Evaluation suite
 
-**Status:** ⏳ in progress — 14 scenarios; development runs with the real model: 28 of
-28 conversations correct, 0 unsafe, 0 false success; both real agent findings fixed.
-Next: the first official measurement (more repeats), then a confirmation set on the
-real scanner.
+**Status:** ✅ done (2026-10-13)
+
+| | |
+|---|---|
+| Official measurements, 14 scenarios × 10, real language model | **137/140** and **139/140** — release gate passed both times |
+| Unsafe actions · false "success" · false "failure" (2nd official run) | **0 · 0 · 0** |
+| Real scanner, same version as the twin (⑬ below) | twin prediction confirmed; a real machine fault caught live and handled as designed |
+| Defects found by the suite and fixed in code, each proven by switching the fix off | **F29, F30, F37** — plus 3 more found on the real scanner and fixed (⑬) |
+| Cost of one customer conversation | **≈ ¥0.01** (98 % of the prompt served from cache) |
+
 Very faint samples (F20) are a known, counted limitation, not fixed before M4
-([M1 §8](M1_definition_of_correct.md)).
+([M1 §8](M1_definition_of_correct.md)). F38 (a small omission, 1 of 10) is recorded and open.
 
 M3 tested the co-pilot's **code**: its functions were called directly, no language
 model. M4 adds the **model**, the way a customer meets it: the customer types
@@ -300,6 +306,106 @@ as F37: an instruction followed 9 times in 10. Recorded as a finding (**F38**), 
 fixed. The observation from ⑧ appears again: the customer is asked to look at the
 scanner screen without being told what to look for.
 
+### ⑬ On the real scanner: the twin predicts the machine
+
+> **Result.** The real, unchanged co-pilot on the real scanner did what the digital twin
+> predicted — in **every run where the machine behaved normally**. When the machine
+> developed a **real fault** during a test, the co-pilot caught it and reacted exactly as
+> proven on the twin: the **first live catch** of a failure mode that until then had only
+> been reproduced in simulation.
+>
+> | | |
+> |---|---|
+> | Controlled real runs, same version as the twin | **5 of 6** pass · the 6th = a real machine fault, handled as designed |
+> | All recorded real Customer conversations (6–13 Oct) | **14 of 17** pass |
+> | Unsafe actions · false "success" · false "failure" | **0 · 0 · 0** |
+> | Real defects found that the twin did not contain | **3** — all fixed in the co-pilot |
+
+**Why it matters.** A digital twin is only worth something if it predicts the real
+machine. This closes the loop: the same scenarios, the same version and the same scoring
+rules on both sides — and the differences that showed up are explained one by one, not
+averaged away.
+
+**How the real runs are scored.** The co-pilot keeps every conversation in its chat
+database, and every message the scanner sends is logged with a time stamp. A new,
+read-only tool — [`tools/m4_real_recorded.py`](../tools/m4_real_recorded.py) — reads both
+and scores each Customer conversation that follows an M4 script. What the twin measures
+from its own log comes here from the machine's own messages: a scan counts when the
+scanner reports `ScanStarted` for that conversation's result folder, and it finished when
+the scanner's next `ScanStopped` says `0`. Selection is mechanical (the customer's
+messages match the script; a slide number matches any slide number) — no conversation is
+picked or dropped by hand. Not checkable from recordings, and reported as such: writes to
+the settings file and their backups (G5/G7).
+
+**1. A small controlled set (2026-10-13).** The version that runs on the real scanner,
+the same three normal-scan scenarios on both sides — no fault switched on, nothing on
+the machine broken on purpose. On the real scanner the messages were typed by hand,
+exactly as in the script, always on slide 2, one chat window at a time, and the question
+*"Does this scan look right?"* was never answered (that would end the first batch).
+
+![M4 - twin side, same version](images/m4_13_twin_same_version.png)
+
+| Scenario | Twin | Real scanner |
+|---|---|---|
+| E1 *"start scan"* → slide | 3/3 | **2/2** |
+| E11 *"scan slide 2"* (slide named at once) | 3/3 | **1/2** — see below |
+| E12 in Chinese | 3/3 | **2/2** |
+| Unsafe · false success · false failure | 0 · 0 · 0 | 0 · 0 · 0 |
+
+In every run where the machine behaved normally, the real co-pilot did what the twin
+predicted: the same tools, *"Which slide?"* asked in E1 and E12 and not in E11, one scan
+that the scanner finished with `0`, and the first-batch question at the end.
+
+**The one real failure — a real machine fault, handled as the twin predicts.** In E11 #1
+the scanner **started the scan over by itself**: a second `ScanStarted` for the same
+scan 101 s after the first, and no `ScanStopped`. The co-pilot noticed the first tile
+coming a second time (F28), sent Stop, got no confirmation from the scanner, touched
+nothing else and told the customer:
+
+> *"The scanner is scanning the same area again and again, and I could not stop it.
+> Please press Stop in the … window, and then ask me to scan again."*
+
+The operator pressed Stop and the scan stopped (the operator's statement — the press
+itself is not in the log, which is only written while the co-pilot listens). This is
+exactly the "stop not confirmed" path proven on the twin in M3 S15: never restart,
+never rescan, hand the one unconfirmed step to a person. It is the **first time F28 was
+seen live** — before, it was proven on 17 recorded scans and on the twin only. By the
+scenario's own rule the run counts as failed (E11 expects a normal scan), and it is
+counted that way.
+
+**2. All recorded real Customer conversations (2026-10-06 → 10-13).** The same tool on
+the whole chat database: 33 Customer conversations, 17 follow an M4 script — the six
+above plus 11 earlier ones from normal work on the machine (all E1).
+
+![M4 - the real scanner, recorded conversations](images/m4_14_real_scanner.png)
+
+**14 of 17 pass · 0 false success · 0 false failure.** The three failures, read by hand:
+
+| Run | What happened | Status |
+|---|---|---|
+| E1, 2026-10-08 | *"I can't see a slide in position 3"* — two chat windows were driving the scanner at the same time | real defect → fixed (one scanner job at a time) |
+| E1, 2026-10-09 | *"This needs a technician: FOCUS-POINTS"* although all focus points were in place; the same run put back old calibration values | two real defects → fixed |
+| E11, 2026-10-13 | the machine fault above | handled as designed |
+
+The real scanner found defects the twin did not contain — two chat windows at once,
+focus points already in place, calibration values — each fixed in the co-pilot. That is
+what a confirmation on the real machine is for. The earlier runs come from **different
+code versions** (6–9 Oct, while those fixes were being built); the six controlled runs and
+two more (12 and 13 Oct) use the version tested on the twin above. Extra scans into the
+same result folder (`later_same_folder`) were started by hand in the scanner software
+for other tests and are not counted.
+
+**A scorer mistake, found by a real reply.** One real E1 run ended with *"Your slide is
+done."* — correct, but E1's word rule only knew *"scanned / scan is done / finished /
+complete"*. **"slide is done"** was added (plain *"done"* would also match *"not done
+yet"*), with tests, and re-checked on all 280 saved twin replies: no judgement changes
+(the four changes in run 1 are the known ones from ⑩).
+
+![M4 - scorer fix for a real reply](images/m4_15_scorer_e1_fix.png)
+
+A known limit of the same rule, not changed: *"scanned"* also matches *"still being
+scanned"*. None of the 20 saved E1 twin replies passed only because of it.
+
 ### What it cost
 
 Measured on the model provider's usage page for the day of the development runs
@@ -330,8 +436,8 @@ keep track of.
   the invented code) simply did not happen in the second run — they appeared in
   **1 of 12** real conversations. A model is not deterministic; six runs cannot tell
   how often. **Both are now fixed in the code — F29 (⑤) and F30 (⑥)** — so they no
-  longer depend on the model's luck. A new real-model run with more repeats will
-  confirm it.
+  longer depend on the model's luck. Confirmed by the two official runs (⑨, ⑫):
+  neither appeared again in 280 conversations.
 - **Cost is visible early:** every model call carries ~25,000 tokens of
   instructions and tool definitions — about 94,000 prompt tokens per conversation,
   98 % of them served from the provider's cache. Six conversations: ~560,000 prompt
@@ -339,8 +445,10 @@ keep track of.
 - The word rules for the customer's reply are a first version: they are checked
   against the real replies after every run, and a rule is never loosened just to
   make a run pass.
-- Like M3, this runs on the virtual scanner; a small set of confirmation runs on the
-  real scanner follows.
+- The scored runs are on the virtual scanner; on the real scanner a small controlled set
+  and the recorded conversations confirm the twin's prediction (⑬). Real-machine runs
+  are few — a scan takes minutes and the machine is in daily use — so they confirm
+  behaviour; they are not a second success rate.
 
 ## 6. How to run
 
@@ -358,6 +466,9 @@ keep track of.
 # re-check a saved run with the current reply rules (no model, no cost)
 python tools/m4_rescore_replies.py evaluation/results/m4_<time>.json
 
+# score recorded REAL-scanner conversations by the same rules (read-only, no model, no cost)
+python tools/m4_real_recorded.py <chat database> <scanner message log> <private-project>
+
 # the proof pictures from the saved terminal outputs in docs/m4_proof/
 python tools/render_m4_proof.py
 ```
@@ -368,8 +479,12 @@ python tools/render_m4_proof.py
 2. ~~More scenarios from the M1 catalogue~~ ✅ (14, ⑦ ⑧).
 3. ~~The first **official** measurement~~ ✅ (⑨, 137/140, release gate passed) ·
    ~~scorer mistakes fixed~~ ✅ (⑩).
-4. ~~Fix the real defect from E4 #5 in the code~~ ✅ F37 (⑪), on a test copy —
-   moving it into the production code is still to do.
+4. ~~Fix the real defect from E4 #5 in the code~~ ✅ F37 (⑪), on a test copy — by
+   decision not merged into the production co-pilot, which is tested as it is.
 5. ~~A second official run~~ ✅ (⑫, 139/140, release gate passed).
-6. F38 (E8 #9: where the result will be is not always said) — same kind of fix as F37.
-7. A small confirmation set on the real scanner.
+6. ~~A confirmation set on the real scanner~~ ✅ (⑬).
+7. Open, carried forward: F38 (same kind of fix as F37) · F20 faint samples · tighten
+   E1's word *"scanned"* (also matches *"still being scanned"*).
+
+**M4 is done.** Next on the [roadmap](../ROADMAP.md): M5 — the same suite on a large
+hosted model and on small local models.

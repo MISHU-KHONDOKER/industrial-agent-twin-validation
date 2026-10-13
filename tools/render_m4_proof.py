@@ -31,6 +31,9 @@ TITLES = {
     "10_scorer_fix": "M4 - scorer fix: tested, re-checked on all 140",
     "11_f37_fix": "F37 fixed - the customer is always told which settings were corrected (check on / off / on)",
     "12_official_run_2": "M4 - second official measurement (test copy with F37): 139 of 140",
+    "13_twin_same_version": "M4 - the twin side: E1, E11, E12 x 3 with the version tested on the real scanner",
+    "14_real_scanner": "M4 - the real scanner: recorded Customer conversations scored by the same rules",
+    "15_scorer_e1_fix": "M4 - scorer fix for a real reply ('Your slide is done'): tested, re-checked on all 280",
 }
 
 m3_colour = rw.colour                            # kept before main() swaps it for colour()
@@ -38,6 +41,10 @@ m3_colour = rw.colour                            # kept before main() swaps it f
 
 def colour(line):
     s = line.lstrip()
+    if re.match(r"E\d+\s+\w{8} \d{8}.*\bPASS\b", s):          # a recorded real conversation
+        return (90, 220, 120), True
+    if re.match(r"E\d+\s+\w{8} \d{8}.*\bFAIL\b", s):
+        return (255, 110, 110), True
     if re.match(r"E\d+ #\d+: SUCCESS FALSE_FAILURE", s):
         return (255, 200, 80), True
     if re.match(r"E\d+ #\d+: SUCCESS", s) or re.match(r"E\d+: (\d+)/\1 SUCCESS", s):

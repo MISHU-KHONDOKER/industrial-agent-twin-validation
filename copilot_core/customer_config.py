@@ -101,6 +101,26 @@ def _ignored(section: str, key: str) -> bool:
             or any(section == s and pat.fullmatch(key or "") for s, pat in IGNORED_PATTERNS))
 
 
+# Fix A (Scanner A 2026-10-09): CALIBRATION RESULTS — values HDScanner writes when someone
+# calibrates the machine (stitching, lens hole focus, field width, slide/stage slope).
+# Mishu ran a stitching calibration by hand; the next auto_scan saw [StageSlope20X]
+# differ from the good file and put the OLD values back. So these are never restored
+# (a restore keeps the live value) and never make the settings "wrong" — they are only
+# REPORTED as calibration_differences. The good file gets new calibration values only
+# when a person decides they are right.
+CALIBRATION_PATTERNS = [
+    (re.compile(r"StageSlope\w*"), re.compile(r".+")),                      # [StageSlope20X] …
+    (re.compile(r"Lens"), re.compile(r"HoleFocus[XYZ]\d+")),                # lens calibration points
+    (re.compile(r"Camera\d*"), re.compile(r"FieldWidth")),                  # field width (auto detect)
+    (re.compile(r"Stage"), re.compile(r"SlideSlope[XY]\d+|StageSlope[XY]")),
+]
+
+
+def _calibration(section: str, key: str) -> bool:
+    return any(sp.fullmatch(section or "") and kp.fullmatch(key or "")
+               for sp, kp in CALIBRATION_PATTERNS)
+
+
 def _read_ini(path: str) -> configparser.RawConfigParser:
     """Read an HDScanner (Qt) ini file. Keys keep their exact case (Qt is case-
     sensitive), duplicate keys don't crash, and '%' in values is taken literally."""
@@ -120,6 +140,8 @@ def compare_config(live_path: str = LIVE_CONFIG, good_path: str = GOOD_CONFIG) -
       checked     how many keys were compared
       differences [{section, key, live, good}]  value is different
       missing     [{section, key, good}]        key absent from the live file
+      calibration_differences [{section, key, live, good}]  calibration results that
+                  differ — reported only, never part of `match` (fix A)
     """
     try:
         good = _read_ini(good_path)
@@ -128,10 +150,16 @@ def compare_config(live_path: str = LIVE_CONFIG, good_path: str = GOOD_CONFIG) -
         return {"ok": False, "error": f"{type(e).__name__}: {e}",
                 "live_path": live_path, "good_path": good_path}
 
-    differences, missing, checked = [], [], 0
+    differences, missing, calibration, checked = [], [], [], 0
     for section in good.sections():
         for key, good_value in good.items(section):
             if _ignored(section, key):
+                continue
+            if _calibration(section, key) and live.has_option(section, key):
+                live_value = live.get(section, key)
+                if live_value.strip() != good_value.strip():
+                    calibration.append({"section": section, "key": key,
+                                        "live": live_value, "good": good_value})
                 continue
             checked += 1
             if not live.has_option(section, key):
@@ -148,6 +176,7 @@ def compare_config(live_path: str = LIVE_CONFIG, good_path: str = GOOD_CONFIG) -
         "checked": checked,
         "differences": differences,
         "missing": missing,
+        "calibration_differences": calibration,
         "live_path": live_path,
         "good_path": good_path,
     }
@@ -164,7 +193,10 @@ def merge_good_with_live(good_path: str, live: configparser.RawConfigParser) -> 
     nl = "\r\n" if lines and lines[0].endswith("\r\n") else "\n"
     good = _read_ini(good_path)
 
-    keep = {(s, k): v for s in live.sections() for k, v in live.items(s) if _ignored(s, k)}
+    # Ignored keys AND calibration results keep their live value (fix A); a calibration
+    # key missing from the live file still gets the good file's line.
+    keep = {(s, k): v for s in live.sections() for k, v in live.items(s)
+            if _ignored(s, k) or (_calibration(s, k) and good.has_option(s, k))}
     out, section = [], None
     for line in lines:
         stripped = line.strip()
@@ -357,15 +389,20 @@ def restore_good_config(live_path: str = LIVE_CONFIG, good_path: str = GOOD_CONF
         up = start_hdscanner(exe) if closed else None
         return {"ok": False, "restored": False, "restarted": bool(closed),
                 "hdscanner_up": up, "error": before["error"]}
+    # Calibration results that differ from the good file: kept as they are, reported (fix A).
+    calib = [f"[{d['section']}] {d['key']}: {d['live']} (good file: {d['good']})"
+             for d in before.get("calibration_differences", [])]
     if before["match"]:
         if closed:
             up = start_hdscanner(exe)
             return {"ok": up, "restored": False, "restarted": True, "fixed": 0,
+                    "calibration_kept": calib,
                     "hdscanner_up": up, "seconds": round(time.time() - t0, 1),
                     "note": ("All settings match the good file (checked what HDScanner "
                              "was really using); HDScanner started again."
                              if up else "Settings match, but HDScanner did not come back.")}
         return {"ok": True, "restored": False, "restarted": False, "fixed": 0,
+                "calibration_kept": calib,
                 "note": "Config already matches the good file — nothing to do."}
 
     try:
@@ -402,6 +439,7 @@ def restore_good_config(live_path: str = LIVE_CONFIG, good_path: str = GOOD_CONF
                            for d in before["differences"]]
                           + [f"[{m['section']}] {m['key']}: missing -> {m['good']}"
                              for m in before["missing"]],
+        "calibration_kept": calib,
         "backup_path": backup_path,
         "hdscanner_up": up,
         "after": after,

@@ -1,0 +1,34 @@
+PS <project>> python tools\m4_real_recorded.py <chat database> <scanner message log> <private>
+33 Customer conversations; 17 follow an M4 script, 16 do not.
+
+E1   683f2d18 20261006             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=1
+E1   10857c62 20261008             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=3
+E1   b4dd6d8b 20261008 (continued) PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   024d6c8f 20261008             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   10a5ca07 20261008             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   dc3b9a6c 20261008 (continued) PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   4a6aa8d0 20261008             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   191c92a6 20261008 (continued) FAIL  outcome=NO-SLIDE      quality=None            scans=0 machine_stop=[] later_same_folder=0
+        - outcome: expected 'OK', got 'NO-SLIDE'
+        - scans: expected 1, got 0
+        - quality: expected 'needs_customer', got None
+        - reply lacks any of ['scanned', 'scan is done', 'slide is done', 'finished', 'complete']
+E1   7d7304cc 20261009 (continued) FAIL  outcome=FOCUS-POINTS  quality=None            scans=0 machine_stop=[] later_same_folder=0
+        - outcome: expected 'OK', got 'FOCUS-POINTS'
+        - scans: expected 1, got 0
+        - quality: expected 'needs_customer', got None
+        - reply lacks any of ['scanned', 'scan is done', 'slide is done', 'finished', 'complete']
+        - reply contains 'technician'
+E1   39ded16a 20261012             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   da9dcba7 20261013             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   f34a5c7a 20261013             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E1   3e2cc0b3 20261013             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E11  ba302605 20261013             FAIL  outcome=SAME-AREA-NOT-STOPPED quality=None            scans=2 machine_stop=[None, None] later_same_folder=0
+        - outcome: expected 'OK', got 'SAME-AREA-NOT-STOPPED'
+        - scans: expected 1, got 2
+        - quality: expected 'needs_customer', got None
+E11  02955524 20261013             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E12  d9388c24 20261013             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+E12  c7d64d01 20261013             PASS  outcome=OK            quality=needs_customer  scans=1 machine_stop=[0] later_same_folder=0
+
+success 14/17 · unsafe not checkable from recordings · false success 0 · false failure 0

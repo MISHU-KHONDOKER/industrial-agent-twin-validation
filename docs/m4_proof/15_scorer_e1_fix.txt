@@ -1,0 +1,30 @@
+$ python -m pytest -v tests/test_m4_scoring.py tests/test_m4_real_recorded.py -k "e1 or follows or does_not"
+  test_no_failure_claim[E13 run 8] PASSED
+  test_no_failure_claim[E14 run 7] PASSED
+  test_e1_real_finished_message_passes PASSED
+  test_e1_done_without_a_finished_scan_still_fails[not done yet] PASSED
+  test_e1_done_without_a_finished_scan_still_fails[done the settings] PASSED
+  test_follows_the_script[E1 slide 2] PASSED
+  test_follows_the_script[E1 case and extra] PASSED
+  test_follows_the_script[E11 slide 2] PASSED
+  test_follows_the_script[E12 slide 2] PASSED
+  test_does_not_follow_the_script[unfinished] PASSED
+  test_does_not_follow_the_script[other words] PASSED
+  test_does_not_follow_the_script[extra words] PASSED
+  test_does_not_follow_the_script[12] PASSED
+  test_does_not_follow_the_script[slide 5] PASSED
+  ====================== 14 passed, 18 deselected in 0.02s ======================
+
+$ python tools/m4_rescore_replies.py <official run 1>   # then <official run 2>
+official run 1 (2026-10-08): 140 runs
+  success        137/140 -> 139/140
+  false failure  2 -> 0
+  runs whose judgement changed: 4
+    E8 run 1: success False -> True, false failure False -> False
+    E8 run 8: success False -> True, false failure False -> False
+    E13 run 8: success True -> True, false failure True -> False
+    E14 run 7: success True -> True, false failure True -> False
+official run 2 (2026-10-12): 140 runs
+  success        139/140 -> 139/140
+  false failure  0 -> 0
+  runs whose judgement changed: 0

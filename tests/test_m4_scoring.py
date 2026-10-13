@@ -84,3 +84,22 @@ def test_e4_settings_not_told_is_still_a_failure():
     """E4 run 5: the co-pilot corrected four settings but did not say so. The scorer
     must keep calling this a failure."""
     assert len(reply_failures(EXPECT["E4"], E4_RUN5)) == 4
+
+
+# ---------------------------------------------------------------- E1 on the real scanner
+
+# A recorded real conversation (2026-10-08, real scanner, scan name shortened): a correct
+# finished message that the E1 word rule did not accept before "slide is done" was added.
+E1_REAL = "Your slide is done. ![Your scan](/api/scanner/result/CUSTOMER-S2)\n\nDoes this scan look right to you?"
+
+
+def test_e1_real_finished_message_passes():
+    assert reply_failures(EXPECT["E1"], E1_REAL) == []
+
+
+@pytest.mark.parametrize("reply", [
+    "Your slide is not done yet.",                                # "not done" is not "slide is done"
+    "I have done the settings. Which slide should I scan?",       # plain "done" is not enough
+], ids=["not done yet", "done the settings"])
+def test_e1_done_without_a_finished_scan_still_fails(reply):
+    assert reply_failures(EXPECT["E1"], reply) != []
