@@ -28,7 +28,7 @@ loop — and every result is shown with the real terminal output.
 | [M2](docs/M2_test_foundation.md) Test foundation | Unit tests + CI + a mutation-test proof |
 | [M3](docs/M3_virtual_instrument.md) Digital twin | 16 of 16 scenarios with the real agent, each fix proven by breaking it on purpose |
 | [M4](docs/M4_evaluation_suite.md) Evaluation suite ✅ | Real model in the loop, 280 scored conversations, confirmed on the real scanner |
-| [M5](docs/M5_small_models.md) Large vs small models ✅ | DeepSeek 99 %, Qwen3 4B 75 % (0 unsafe), Qwen3 8B not viable on CPU |
+| [M5](docs/M5_small_models.md) Large vs small models ✅ | 0 unsafe for all 4 models · DeepSeek 99 % · Qwen3 4B 75 %, 0 false claims · Llama 3.1 8B 54 %, 2 false successes via a co-pilot side door (`start_scan`) |
 
 > **What this is not:** the full scanner integration. That lives in a private
 > repository, because it controls a proprietary hardware interface and embeds
@@ -168,8 +168,6 @@ would itself be a leak.
 The full plan, with the status of each milestone, is in
 **[ROADMAP.md](ROADMAP.md)**. Highlights:
 
-- **Large vs small models (M5):** the same evaluation suite on a large hosted model
-  and on small local models — accuracy, safety, latency and cost side by side.
 - **Red-teaming (M6):** prompt injection, misleading machine responses and unsafe
   requests, with measured refusal rates.
 - A **risk register and EU AI Act assessment** for an AI agent that controls

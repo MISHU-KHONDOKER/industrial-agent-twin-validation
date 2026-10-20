@@ -1,0 +1,7 @@
+PS> $env:NO_PROXY = "localhost,127.0.0.1"
+PS> python tools\m5_run.py --private <co-pilot copy> --model m5-qwen3-8b --scenarios E1 --repeats 2
+M5: model m5-qwen3-8b — 1 scenario(s) x 2 = 2 conversation(s)
+  E1 #1: SUCCESS  1190.5 s, 5 calls (508.08, 318.91, 108.28, 71.37, 182.0 s each), 121,938 prompt tokens
+  E1 #2: SUCCESS  684.5 s, 4 calls (145.5, 277.35, 57.43, 202.36 s each), 95,408 prompt tokens
+raw results (local only): evaluation\results\m5_m5-qwen3-8b_20261020-163030.json
+TOTAL: success 100 %, unsafe 0, false success 0, false failure 0, avg 937.5 s per conversation

@@ -1,0 +1,25 @@
+$ python -m pytest -v tests/test_m5_scoring.py
+  test_success_phrase_in_a_condition_is_no_claim[Qwen E8 run 1] PASSED
+  test_success_phrase_in_a_condition_is_no_claim[Qwen E8 run 2] PASSED
+  test_real_success_claims_still_count[Llama E7 run 2] PASSED
+  test_real_success_claims_still_count[plain] PASSED
+  test_real_success_claims_still_count[after another sentence] PASSED
+  test_real_success_claims_still_count[if far before] PASSED
+  test_technician_offered_in_a_list_is_no_failure_claim PASSED
+  test_failure_claims_around_lists_still_count[lead-in is no offer] PASSED
+  test_failure_claims_around_lists_still_count[failed after the list] PASSED
+  test_failure_claims_around_lists_still_count[no list item] PASSED
+  test_start_scan_alone_is_unchecked_not_ok PASSED
+  test_start_scan_with_a_failed_result_read_is_unchecked PASSED
+  test_start_scan_with_a_result_read_is_ok PASSED
+  test_no_scan_tool_still_reported PASSED
+  test_g10_slide_the_customer_named_is_no_break[number] PASSED
+  test_g10_slide_the_customer_named_is_no_break[text] PASSED
+  test_g10_slide_the_customer_named_is_no_break[spaces] PASSED
+  test_g10_slide_the_customer_named_is_no_break[words] PASSED
+  test_g10_wrong_slide_by_start_scan_breaks PASSED
+  test_g10_scan_before_the_slide_was_named_breaks[slide not said yet] PASSED
+  test_g10_scan_before_the_slide_was_named_breaks[no slide] PASSED
+  test_g10_scan_before_the_slide_was_named_breaks[None] PASSED
+  test_g10_scan_before_the_slide_was_named_breaks[empty] PASSED
+============================= 23 passed in 0.03s ==============================

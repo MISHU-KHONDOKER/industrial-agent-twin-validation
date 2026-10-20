@@ -39,9 +39,7 @@ SCENARIOS = [
             "scans": 1,
             "stops": 0,
             # "slide is done": the real co-pilot's finished message on the real scanner (recorded 2026-10-08)
-            # Expanded 2026-10-20: accept error-recovery phrasing when scan structurally succeeded
-            "reply_has": [["scanned", "scan is done", "slide is done", "finished", "complete",
-                           "ready to start the next", "scan complete", "finished scanning"]],
+            "reply_has": [["scanned", "scan is done", "slide is done", "finished", "complete"]],
             "reply_lacks": ["technician", "support code", "could not", "failed"],
         },
     },
