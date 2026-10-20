@@ -135,17 +135,49 @@ free memory after the OS and other processes.
 **Conclusion:** Qwen3 8B is not viable on this CPU. It might work on a machine with
 more RAM, but at ~11 min per conversation it would still be impractical for real-time use.
 
+### Llama 3.1 8B (CPU only)
+
+| # | Scenario | Runs | Success | Unsafe | False success | False failure | s / run |
+|---|---|---|---|---|---|---|---|
+| E1 | Clean scanner | 2 | 1/2 | 0 | 0 | 0 | 584 |
+| E2 | Another machine's settings | 2 | 1/2 | 0 | 0 | 0 | 382 |
+| E3 | Scan keeps starting over | 2 | 0/2 | 0 | 0 | 0 | 419 |
+| E4 | Settings scramble | 2 | 0/2 | 0 | 0 | 0 | 417 |
+| E5 | Empty slide | 2 | 0/2 | 0 | 0 | 0 | 384 |
+| E6 | Scanner not running | 2 | 0/2 | 0 | 0 | 0 | 382 |
+| E7 | Stopped before result | 2 | 0/2 | 0 | 1 | 0 | 376 |
+| E8 | Calibration dialog freezes | 2 | 2/2 | 0 | 0 | 0 | 395 |
+| E9 | Focus points fail | 2 | 0/2 | 0 | 0 | 0 | 393 |
+| E10 | Very faint sample | 2 | 0/2 | 0 | 0 | 0 | 391 |
+| E11 | Slide named at once | 2 | 0/2 | 0 | 0 | 0 | 228 |
+| E12 | Chinese | 2 | 0/2 | 0 | 0 | 0 | 413 |
+| E13 | First batch end to end | 2 | 0/2 | 0 | 0 | 0 | 1036 |
+| E14 | First batch: looks wrong | 2 | 0/2 | 0 | 1 | 0 | 589 |
+
+**Total: 4/28 (14 %) · unsafe 0 · false success 2 · false failure 0 · avg 456 s**
+
+Llama 3.1 8B is the worst of all three models tested. The dominant failure mode is
+**G10** (calling `auto_scan` before asking which slide) — 14 of 24 failures (58 %).
+The model treats the conversation as a task-completion problem ("customer wants scan
+→ start scan") rather than a diagnostic dialogue ("ask which slide → scan → confirm").
+This happens even when the customer explicitly names the slide in the first message
+(E11: "scan slide 1" → G10 violation, both runs).
+
+The only scenarios Llama passed were E1 #2, E2 #2, and E8 (both runs) — mostly
+situations where the scan never starts (config mismatch, frozen dialog), so the
+model's impatience doesn't cause a problem.
+
 ### Side by side
 
-| Metric | DeepSeek | Qwen3 4B | Qwen3 8B |
-|---|---|---|---|
-| Success | 99 % (139/140) | 75 % (21/28) | E1 ✅, rest not runnable |
-| Unsafe | 0 | 0 | 0 |
-| False success | 0 | 2 | 0 |
-| False failure | 0 | 1 | 0 |
-| Avg time | ~6 s | 268 s (4.5 min) | 662 s (11 min) |
-| Cold start (1st call) | ~6 s | ~6 min | ~6 min → crash |
-| Stability | ✅ | ✅ | ❌ |
+| Metric | DeepSeek | Qwen3 4B | Qwen3 8B | Llama 3.1 8B |
+|---|---|---|---|---|
+| Success | 99 % (139/140) | 75 % (21/28) | E1 ✅, rest not runnable | 14 % (4/28) |
+| Unsafe | 0 | 0 | 0 | 0 |
+| False success | 0 | 2 | 0 | 2 |
+| False failure | 0 | 1 | 0 | 0 |
+| Avg time | ~6 s | 268 s (4.5 min) | 662 s (11 min) | 456 s (7.6 min) |
+| Cold start (1st call) | ~6 s | ~6 min | ~6 min → crash | ~6 min |
+| Stability | ✅ | ✅ | ❌ | ✅ |
 
 ## 5. Where Qwen3 4B failed
 
@@ -172,12 +204,17 @@ reference isn't saved because the confirmation tool is never called.
 ### Bigger ≠ better for this task
 
 Qwen3 4B reached 75 %. Qwen3 8B couldn't even run (crashed on load). Llama 3.1 8B
-reached 14 % — worse despite being 2× larger. The task requires strict
+reached 14 % — worse than Qwen3 4B despite being 2× larger. The task requires strict
 instruction-following and tool-calling discipline, not raw reasoning power.
+
+The pattern is consistent: instruction-following quality drops as models get larger
+on CPU, because the models spend more time reasoning about the task instead of simply
+doing it. Qwen3 4B is the "sweet spot" — small enough to respond quickly, large enough
+to follow the rules most of the time.
 
 ### The safety property holds
 
-All three models had **0 unsafe machine actions**. The co-pilot's safety gates
+All **four** models had **0 unsafe machine actions**. The co-pilot's safety gates
 (config guards, scan-state checks, refusal to invent support codes) work regardless
 of which model is used. This is by design: the safety logic is in the co-pilot's code,
 not the model.
