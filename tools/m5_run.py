@@ -12,6 +12,7 @@ Run with the PRIVATE project's Python (it has the co-pilot's dependencies):
 
   --base-url   OpenAI-compatible server (default: local Ollama, http://localhost:11434/v1)
   --model      the model name on that server
+  --no-think   turn thinking off for hybrid models such as Qwen3 8B (sends reasoning_effort=none)
 
 Writes evaluation/results/m5_<model>_<time>.json (LOCAL ONLY, gitignored like M4's raw
 results: the model's words can quote the private knowledge base). No report yet.
@@ -39,7 +40,7 @@ RESULTS_DIR = REPO / "evaluation" / "results"
 CALL_TIMEOUT = 1800       # s — a CPU model reading ~25,000 tokens for the first time is slow
 
 
-def use_model(base_url: str, model: str):
+def use_model(base_url: str, model: str, no_think: bool = False):
     """Make every co-pilot loaded by the driver talk to `model` on `base_url`."""
     original_load = driver.load_copilot
     client = OpenAI(base_url=base_url, api_key="local", timeout=CALL_TIMEOUT)
@@ -49,6 +50,8 @@ def use_model(base_url: str, model: str):
 
         def create_on_model(*args, **kwargs):
             kwargs["model"] = model          # the co-pilot asks for its own model name
+            if no_think:
+                kwargs["reasoning_effort"] = "none"   # hybrid models: answer without thinking
             return client.chat.completions.create(*args, **kwargs)
 
         # the co-pilot looks up `client` at call time, so this replaces every call
@@ -66,13 +69,15 @@ def main():
     ap.add_argument("--base-url", default="http://localhost:11434/v1")
     ap.add_argument("--scenarios", default="E1")
     ap.add_argument("--repeats", type=int, default=1)
+    ap.add_argument("--no-think", action="store_true",
+                    help="turn thinking off for hybrid models (sends reasoning_effort=none)")
     args = ap.parse_args()
 
-    use_model(args.base_url, args.model)
+    use_model(args.base_url, args.model, args.no_think)
     wanted = args.scenarios.split(",")
     chosen = [s for s in SCENARIOS if s["id"] in wanted]
     started = datetime.now().strftime("%Y-%m-%d %H:%M")
-    print(f"M5: model {args.model} — {len(chosen)} scenario(s) x {args.repeats} = "
+    print(f"M5: model {args.model}{' (thinking off)' if args.no_think else ''} — {len(chosen)} scenario(s) x {args.repeats} = "
           f"{len(chosen) * args.repeats} conversation(s)", flush=True)
 
     raw, all_scores = [], []
@@ -98,7 +103,7 @@ def main():
     safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_", args.model)
     out = RESULTS_DIR / f"m5_{safe_name}_{datetime.now():%Y%m%d-%H%M%S}.json"
     out.write_text(json.dumps({"started": started, "model": args.model, "base_url": args.base_url,
-                               "private": args.private, "repeats": args.repeats,
+                               "no_think": args.no_think, "private": args.private, "repeats": args.repeats,
                                "total": total, "runs": raw}, indent=2, ensure_ascii=False, default=str),
                    encoding="utf-8")
     print(f"raw results (local only): {out.relative_to(REPO)}")

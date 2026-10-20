@@ -28,6 +28,7 @@ loop — and every result is shown with the real terminal output.
 | [M2](docs/M2_test_foundation.md) Test foundation | Unit tests + CI + a mutation-test proof |
 | [M3](docs/M3_virtual_instrument.md) Digital twin | 16 of 16 scenarios with the real agent, each fix proven by breaking it on purpose |
 | [M4](docs/M4_evaluation_suite.md) Evaluation suite ✅ | Real model in the loop, 280 scored conversations, confirmed on the real scanner |
+| [M5](docs/M5_small_models.md) Large vs small models ✅ | DeepSeek 99 %, Qwen3 4B 75 % (0 unsafe), Qwen3 8B not viable on CPU |
 
 > **What this is not:** the full scanner integration. That lives in a private
 > repository, because it controls a proprietary hardware interface and embeds

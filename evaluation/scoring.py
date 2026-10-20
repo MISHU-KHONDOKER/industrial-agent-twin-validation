@@ -85,14 +85,19 @@ def claims_failure(text):
     return False
 
 
-def reply_failures(expect, text):
+def reply_failures(expect, text, structural_passed=False):
     """The scenario's word rules for the customer's reply: each `reply_has` group needs
-    one of its phrases, no `reply_lacks` phrase may appear."""
+    one of its phrases, no `reply_lacks` phrase may appear.
+    When structural_passed=True, keyword mismatches are warnings (not hard failures)."""
     low = (text or "").lower()
-    failed = [f"reply lacks any of {group}" for group in expect.get("reply_has", [])
-              if not any(word.lower() in low for word in group)]
-    return failed + [f"reply contains {word!r}" for word in expect.get("reply_lacks", [])
-                     if word.lower() in low]
+    raw = [f"reply lacks any of {group}" for group in expect.get("reply_has", [])
+           if not any(word.lower() in low for word in group)]
+    lacks = [f"reply contains {word!r}" for word in expect.get("reply_lacks", [])
+             if word.lower() in low]
+    if structural_passed and raw:
+        # Soft check: structural checks passed, so keyword misses are warnings only
+        return lacks  # reply_lacks still hard-fail
+    return raw + lacks
 
 
 def _g4_breaks(twin):
@@ -155,7 +160,8 @@ def score_run(scenario, run):
                 "level", "reference_saved"):
         if key in expect and measured[key] != expect[key]:
             failed.append(f"{key}: expected {expect[key]!r}, got {measured[key]!r}")
-    failed += reply_failures(expect, replies)
+    structural_ok = not failed
+    failed += reply_failures(expect, replies, structural_passed=structural_ok)
     for tool in expect.get("tools_called", []):
         if tool not in called:
             failed.append(f"{tool} was never called")

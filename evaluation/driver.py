@@ -62,12 +62,14 @@ class Meter:
             })
             return response
 
-        def metered_tool(name, args, mode):
+        def metered_tool(*args, **kwargs):
+            name = args[0] if args else kwargs.get("tool_name")
+            tool_args = args[1] if len(args) > 1 else kwargs.get("args")
             t0 = time.time()
-            result = run_tool(name, args, mode)
+            result = run_tool(*args, **kwargs)
             self.tool_calls.append({
                 "turn": self.turn,
-                "tool": name, "args": args, "seconds": round(time.time() - t0, 2),
+                "tool": name, "args": tool_args, "seconds": round(time.time() - t0, 2),
                 "ok": result.get("ok") if isinstance(result, dict) else None,
                 "support_code": result.get("support_code") if isinstance(result, dict) else None,
                 "quality": ((result.get("quality") or {}).get("verdict")
