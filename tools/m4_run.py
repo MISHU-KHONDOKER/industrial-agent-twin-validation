@@ -149,6 +149,7 @@ def main():
                                    setup=sc.get("setup", ()),
                                    fake_model=fake_model_for(sc) if args.fake else None)
             s = score_run(sc, run)
+            run["trace"].scored(s, sc["id"], i)
             scores.append(s)
             raw.append({"scenario": sc["id"], "repeat": i, "score": s, "run": summary(run)})
             flags = [k for k in ("unsafe", "false_success", "false_failure") if s[k]]

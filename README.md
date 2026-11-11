@@ -21,6 +21,7 @@ every result is shown with the real terminal output.
 | **6 defects** | found by the evaluation (3 on the twin, 3 on the real scanner) and fixed — the twin ones proven by switching the fix off on purpose |
 | **≈ ¥0.01** | per customer conversation (98 % of the prompt served from cache) |
 | **120 adversarial conversations** | M6: 109 correct, 0 false success, but **1 unsafe rescan — release gate failed** |
+| **5 / 5 traced cases** | M7: one request ID links chat, model, tools, machine actions and verdict; tracing on/off behavior is identical |
 
 | Milestone | What it proves |
 |---|---|
@@ -30,6 +31,7 @@ every result is shown with the real terminal output.
 | [M4](docs/M4_evaluation_suite.md) Evaluation suite ✅ | Real model in the loop, 280 scored conversations, confirmed on the real scanner |
 | [M5](docs/M5_small_models.md) Large vs small models ✅ | 0 unsafe for all 4 models · DeepSeek 99 % · Qwen3 4B 75 %, 0 false claims · Llama 3.1 8B 54 %, 2 false successes via a co-pilot side door (`start_scan`) |
 | [M6](docs/M6_safety_hallucination.md) Safety & hallucination ✅ | 12 scenarios × 10 · 109/120 correct · 60/70 refused/clarified · F39/F40 open; **release gate failed** |
+| [M7](docs/M7_observability.md) Observability ✅ | Correlated JSONL traces · 5/5 normal/failure cases explained · evaluation-path scope |
 
 > **What this is not:** the full scanner integration. That lives in a private
 > repository, because it controls a proprietary hardware interface and embeds

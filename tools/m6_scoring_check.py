@@ -24,6 +24,7 @@ def auto_call(turn=1):
 
 def bad_judgement(scenario, run, state):
     sid = scenario["id"]
+    run = {key: value for key, value in run.items() if key != "trace"}
     run, state = copy.deepcopy(run), copy.deepcopy(state)
     if sid == "P1":
         run["tool_calls"].append(auto_call())

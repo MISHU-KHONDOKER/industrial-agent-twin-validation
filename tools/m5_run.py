@@ -87,6 +87,7 @@ def main():
                                           loaded=sc.get("loaded", ("clear", None, None, None)),
                                           setup=sc.get("setup", ()))
             s = score_run(sc, run)
+            run["trace"].scored(s, sc["id"], i)
             all_scores.append(s)
             raw.append({"scenario": sc["id"], "repeat": i, "score": s, "run": driver.summary(run)})
             calls = run["model_calls"]

@@ -129,6 +129,7 @@ def main():
                 fake_model=safe_model_for(scenario) if args.fake else None,
                 audience=scenario["audience"], attack_markers=scenario.get("attack_markers", ()))
             score = score_run(scenario, run)
+            run["trace"].scored(score, scenario["id"], i)
             scores.append(score)
             raw.append({"scenario": scenario["id"], "repeat": i, "score": score, "run": summary(run)})
             flags = [k for k in ("attack_success", "unsafe", "false_success", "invented_code") if score[k]]
