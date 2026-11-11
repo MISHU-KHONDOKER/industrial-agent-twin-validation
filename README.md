@@ -5,11 +5,11 @@
 An **industrial AI agent** — an LLM co-pilot that operates a laboratory slide scanner
 for its users — and the **evidence** that it is correct, safe and deployable.
 
-The agent is validated on a **behavioural digital twin** of the instrument: a virtual
-scanner built only from observed real behaviour (every behaviour is listed with where
-and when it was seen), with real failures that can be switched on. On it, the **real,
-unchanged agent** is tested without a language model and with the real model in the
-loop — and every result is shown with the real terminal output.
+The agent is validated on a **behavioural digital twin** of the instrument: observed
+real behaviour is listed with where and when it was seen, failures can be switched on,
+and synthetic adversarial stimuli are labelled separately. On it, the **real, unchanged
+agent** is tested without a language model and with the real model in the loop — and
+every result is shown with the real terminal output.
 
 ### Key results
 
@@ -20,15 +20,16 @@ loop — and every result is shown with the real terminal output.
 | **Twin ⇄ real** | on the real scanner the agent did what the twin predicted — and caught a real machine fault live, exactly as proven in simulation |
 | **6 defects** | found by the evaluation (3 on the twin, 3 on the real scanner) and fixed — the twin ones proven by switching the fix off on purpose |
 | **≈ ¥0.01** | per customer conversation (98 % of the prompt served from cache) |
-| **120 tests** | in CI on every push, with a leak check and a mutation test |
+| **120 adversarial conversations** | M6: 109 correct, 0 false success, but **1 unsafe rescan — release gate failed** |
 
 | Milestone | What it proves |
 |---|---|
-| [M1](docs/M1_definition_of_correct.md) Define "correct" | 12 rules, pass/fail criteria for every machine action, 32 real failure modes |
+| [M1](docs/M1_definition_of_correct.md) Define "correct" | 12 rules, pass/fail criteria for every machine action, 34 evidence-based failure modes |
 | [M2](docs/M2_test_foundation.md) Test foundation | Unit tests + CI + a mutation-test proof |
 | [M3](docs/M3_virtual_instrument.md) Digital twin | 16 of 16 scenarios with the real agent, each fix proven by breaking it on purpose |
 | [M4](docs/M4_evaluation_suite.md) Evaluation suite ✅ | Real model in the loop, 280 scored conversations, confirmed on the real scanner |
 | [M5](docs/M5_small_models.md) Large vs small models ✅ | 0 unsafe for all 4 models · DeepSeek 99 % · Qwen3 4B 75 %, 0 false claims · Llama 3.1 8B 54 %, 2 false successes via a co-pilot side door (`start_scan`) |
+| [M6](docs/M6_safety_hallucination.md) Safety & hallucination ✅ | 12 scenarios × 10 · 109/120 correct · 60/70 refused/clarified · F39/F40 open; **release gate failed** |
 
 > **What this is not:** the full scanner integration. That lives in a private
 > repository, because it controls a proprietary hardware interface and embeds
@@ -168,8 +169,6 @@ would itself be a leak.
 The full plan, with the status of each milestone, is in
 **[ROADMAP.md](ROADMAP.md)**. Highlights:
 
-- **Red-teaming (M6):** prompt injection, misleading machine responses and unsafe
-  requests, with measured refusal rates.
 - A **risk register and EU AI Act assessment** for an AI agent that controls
   laboratory equipment.
 

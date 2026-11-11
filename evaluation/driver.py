@@ -1,8 +1,8 @@
-"""M4 driver: one customer conversation with the REAL co-pilot and the REAL language
-model, on the virtual scanner.
+"""M4/M6 driver: one co-pilot conversation with the REAL co-pilot and language model,
+on the virtual scanner.
 
-It drives the co-pilot exactly like the browser does - start a session, then send
-the customer's messages one by one - and measures everything from the OUTSIDE:
+It drives the co-pilot exactly like the browser does - start a Customer or Training
+session, then send the user's messages one by one - and measures everything from the OUTSIDE:
 
   * every language-model call: time and tokens (incl. tokens served from cache),
   * every tool the model asks for, with its arguments and a short result,
@@ -37,14 +37,19 @@ for _var in ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"):
 class Meter:
     """Wraps the co-pilot's model client and tool runner; records every call."""
 
-    def __init__(self, main):
+    def __init__(self, main, attack_markers=()):
         self.model_calls = []
         self.tool_calls = []
+        self.attack_markers = tuple(attack_markers)
+        self.attack_markers_seen = set()
         self.turn = 0                     # 0 = the greeting, n = the customer's n-th message
         create = main.client.chat.completions.create
         run_tool = main._run_tool_by_name
 
         def metered_create(*args, **kwargs):
+            if self.attack_markers:
+                sent = json.dumps(kwargs.get("messages", []), ensure_ascii=False, default=str)
+                self.attack_markers_seen.update(m for m in self.attack_markers if m in sent)
             t0 = time.time()
             response = create(*args, **kwargs)
             usage = getattr(response, "usage", None)
@@ -84,12 +89,13 @@ class Meter:
 
 
 def run_conversation(private_root, script, mode="brightfield", loaded=("clear", None, None, None),
-                     faults=(), fake_model=None, setup=()):
-    """Start a Customer session and send `script` (the customer's messages) one by one.
+                     faults=(), fake_model=None, setup=(), audience="customer", attack_markers=()):
+    """Start a session and send `script` (the user's messages) one by one.
 
     `loaded`: what is in each loader position (None = empty). `setup`: settings put
     in place before the run, as (section, key, value, live_key) - like the M3 scenarios.
     `fake_model`: a stand-in for the model API (offline plumbing tests, no tokens).
+    `attack_markers`: synthetic M6 strings whose delivery to the model must be recorded.
     Returns a dict: transcript, model_calls, tool_calls, the virtual scanner (`twin`,
     for the scorer to inspect), seconds, and `error` if the run itself crashed."""
     work = Path(tempfile.mkdtemp(prefix="m4-"))
@@ -103,14 +109,14 @@ def run_conversation(private_root, script, mode="brightfield", loaded=("clear", 
     os.makedirs(work / "knowledge", exist_ok=True)
     if fake_model is not None:
         main.client.chat.completions.create = fake_model
-    meter = Meter(main)
+    meter = Meter(main, attack_markers)
     config_sha_before = hashlib.sha256(twin.config_path.read_bytes()).hexdigest()
 
     transcript, t0, error = [], time.time(), None
     try:
         # The co-pilot reads its knowledge files relative to its own folder.
         with _inside(str(Path(private_root).resolve())):
-            started = main.start(main.StartRequest(mode=mode, audience="customer"))
+            started = main.start(main.StartRequest(mode=mode, audience=audience))
             session_id = started["session_id"]
             transcript.append({"role": "copilot", "text": started["reply"]})
             for meter.turn, message in enumerate(script, start=1):
@@ -120,9 +126,10 @@ def run_conversation(private_root, script, mode="brightfield", loaded=("clear", 
     except Exception as e:                        # a crash is a result too
         error = f"{type(e).__name__}: {e}"
 
-    return {"mode": mode, "faults": list(faults), "script": list(script),
+    return {"mode": mode, "audience": audience, "faults": list(faults), "script": list(script),
             "transcript": transcript, "model_calls": meter.model_calls,
             "tool_calls": meter.tool_calls, "twin": twin,
+            "attack_markers_seen": sorted(meter.attack_markers_seen),
             "config_sha_before": config_sha_before,
             "knowledge_dir": str(work / "knowledge"),     # where a confirmed reference would be saved
             # the support codes the co-pilot really has - anything else told to a customer is invented
