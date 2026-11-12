@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "deployment": "m8-local-qwen3-4b",
+  "prompt": {
+    "path": "knowledge/system_prompt.md",
+    "sha256": "a801462040be439ba8be1c6ac618bd5f8175fc81e03bbc7f2e10aa8c4f9548e5"
+  },
+  "model": {
+    "reference": "qwen3:4b-instruct-2507-q4_K_M",
+    "weights_sha256": "85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9",
+    "registry_manifest": "https://registry.ollama.ai/v2/library/qwen3/manifests/4b-instruct-2507-q4_K_M"
+  },
+  "runtime": {
+    "ollama_image": "ollama/ollama:0.13.3",
+    "python": "3.12"
+  },
+  "validation": {
+    "m5_model_family": "Qwen3 4B: 21/28 correct, 0 unsafe, 0 false claims; CPU demo only",
+    "m6_release_gate": "failed",
+    "open_findings": ["F39", "F40"]
+  }
+}

@@ -32,6 +32,7 @@ every result is shown with the real terminal output.
 | [M5](docs/M5_small_models.md) Large vs small models ✅ | 0 unsafe for all 4 models · DeepSeek 99 % · Qwen3 4B 75 %, 0 false claims · Llama 3.1 8B 54 %, 2 false successes via a co-pilot side door (`start_scan`) |
 | [M6](docs/M6_safety_hallucination.md) Safety & hallucination ✅ | 12 scenarios × 10 · 109/120 correct · 60/70 refused/clarified · F39/F40 open; **release gate failed** |
 | [M7](docs/M7_observability.md) Observability ✅ | Correlated JSONL traces · 5/5 normal/failure cases explained · evaluation-path scope |
+| [M8](docs/M8_deployment.md) Deployment ⏳ | Docker Compose + Qwen3 4B · prompt/model version guard · fresh-machine check pending |
 
 > **What this is not:** the full scanner integration. That lives in a private
 > repository, because it controls a proprietary hardware interface and embeds
@@ -203,40 +204,59 @@ run_tool()  ← your domain actions plug in here
 
 - `app/main.py` — the agent: tool loop, session storage, crash recovery.
 - `app/static/index.html` — a minimal chat front-end.
-- `knowledge/system_prompt.md` — placeholder system prompt (swap in your own).
+- `knowledge/system_prompt.md` — placeholder system prompt (record its new hash in the deployment manifest when changing it).
+- `deployment/manifest.json` — the local deployment's prompt, model and runtime versions.
 - `.env.example` — configuration template (copy to `.env`).
 
 ---
 
 ## Running it
 
-### 1. Set up a virtual environment
+### One-command local deployment (M8, in progress)
+
+With Docker Engine and Docker Compose installed:
+
+```bash
+docker compose up --build
+```
+
+The first run downloads approximately 2.5 GB of model weights. Open
+**http://127.0.0.1:8000/** once the app is healthy. The model and SQLite conversations persist
+in Docker volumes. See [M8 — Deployment](docs/M8_deployment.md) for version, resource and
+verification details.
+
+> This is an offline demo of the public reference agent, not the proprietary scanner
+> integration. **M6's release gate remains failed (F39/F40); this is not production approval.**
+
+### Manual setup with an external model
+
+#### 1. Set up a virtual environment
 
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-### 2. Install dependencies
+#### 2. Install dependencies
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-### 3. Configure your API key
+#### 3. Configure your API key
 
 ```powershell
 Copy-Item .env.example .env
 # edit .env and set DEEPSEEK_API_KEY (or point DEEPSEEK_BASE_URL at another provider)
 ```
 
-### 4. Start the server
+#### 4. Start the server
 
 ```powershell
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 5. Open the app
+#### 5. Open the app
 
 Browse to **http://127.0.0.1:8000/** and try:
 

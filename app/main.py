@@ -32,6 +32,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from app.versioning import load_runtime_version
+
 load_dotenv()
 
 # ---------------------------------------------------------------------------
@@ -44,6 +46,7 @@ client = OpenAI(
 )
 
 CHAT_MODEL = os.getenv("CHAT_MODEL", "deepseek-chat")
+VERSION_INFO = load_runtime_version()
 
 # ---------------------------------------------------------------------------
 # Example tools — replace these with your own domain actions. They exist so the
@@ -172,6 +175,16 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 @app.get("/")
 def root():
     return FileResponse("app/static/index.html")
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/api/version")
+def version():
+    return VERSION_INFO
 
 
 # ---------------------------------------------------------------------------

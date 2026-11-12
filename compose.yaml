@@ -1,0 +1,56 @@
+services:
+  ollama:
+    image: ollama/ollama:0.13.3
+    restart: unless-stopped
+    environment:
+      OLLAMA_CONTEXT_LENGTH: "32768"
+      OLLAMA_HOST: 0.0.0.0:11434
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  model-init:
+    image: ollama/ollama:0.13.3
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      MODEL_ID: qwen3:4b-instruct-2507-q4_K_M
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama pull \"$$MODEL_ID\""]
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+      model-init:
+        condition: service_completed_successfully
+    environment:
+      DEPLOYMENT_PROFILE: local
+      DEEPSEEK_API_KEY: local
+      DEEPSEEK_BASE_URL: http://ollama:11434/v1
+      CHAT_MODEL: qwen3:4b-instruct-2507-q4_K_M
+      DB_PATH: /data/copilot.db
+      NO_PROXY: localhost,127.0.0.1,ollama
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - copilot-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  ollama-models:
+  copilot-data:

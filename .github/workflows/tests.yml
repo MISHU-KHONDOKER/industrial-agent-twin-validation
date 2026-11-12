@@ -20,3 +20,7 @@ jobs:
         run: python -m pytest
       - name: Mutation test (the F01 test must catch a switched-off guard)
         run: python tools/demo_mutation_test.py
+      - name: Validate deployment Compose configuration
+        run: docker compose config --quiet
+      - name: Build deployment image
+        run: docker build .

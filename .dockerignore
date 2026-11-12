@@ -1,0 +1,15 @@
+.git
+.github
+.env
+.leakcheck-private.txt
+.sync-private.txt
+.pytest_cache
+venv
+journal
+*.db
+**/__pycache__
+*.pyc
+evaluation/results
+docs
+tests
+tools
