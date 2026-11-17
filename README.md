@@ -32,7 +32,7 @@ every result is shown with the real terminal output.
 | [M5](docs/M5_small_models.md) Large vs small models ✅ | 0 unsafe for all 4 models · DeepSeek 99 % · Qwen3 4B 75 %, 0 false claims · Llama 3.1 8B 54 %, 2 false successes via a co-pilot side door (`start_scan`) |
 | [M6](docs/M6_safety_hallucination.md) Safety & hallucination ✅ | 12 scenarios × 10 · 109/120 correct · 60/70 refused/clarified · F39/F40 open; **release gate failed** |
 | [M7](docs/M7_observability.md) Observability ✅ | Correlated JSONL traces · 5/5 normal/failure cases explained · evaluation-path scope |
-| [M8](docs/M8_deployment.md) Deployment ⏳ | Docker Compose + Qwen3 4B · prompt/model version guard · fresh-machine check pending |
+| [M8](docs/M8_deployment.md) Deployment ✅ | Docker Compose + Qwen3 4B · prompt/model version guard · one-command launch and restart persistence verified |
 
 > **What this is not:** the full scanner integration. That lives in a private
 > repository, because it controls a proprietary hardware interface and embeds
@@ -212,7 +212,7 @@ run_tool()  ← your domain actions plug in here
 
 ## Running it
 
-### One-command local deployment (M8, in progress)
+### One-command local deployment (M8)
 
 With Docker Engine and Docker Compose installed:
 

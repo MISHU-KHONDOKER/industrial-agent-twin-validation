@@ -1,6 +1,6 @@
 # M8 — Deployment
 
-**Status:** ⏳ in progress · **Scope:** the public FastAPI reference agent with a local model
+**Status:** ✅ done · **Scope:** the public FastAPI reference agent with a local model
 
 > **Release gate:** M6 remains **failed** (109/120, F39 escalation weakness and F40 unsafe
 > rescan). This local deployment is an offline demonstration, not approval for production
@@ -64,19 +64,21 @@ changes neither the M6 result nor the release decision.
 
 ## 4. Verification
 
-Current verification on the development PC:
+Verification on the development PC, with the Docker launch completed on 2026-11-17:
 
 | Check | Result |
 |---|---|
 | M8 manifest, model guard and Compose structure tests | **4/4 passed** |
 | Full unit suite | **184 passed, 1 expected xfail** (known open F20) |
-| Real FastAPI + local Qwen3 4B conversation | **Passed**: health/version 200; start/chat 200; addition answer 42 |
+| Compose validation, image build and one-command launch | **Passed** with Docker Engine 29.9.3 and Compose v5.7.0; model initialization exited 0 and both long-running services became healthy |
+| Containerized web/API + local Qwen3 4B conversation | **Passed**: `/`, health, version, start and chat returned 200; addition answer 42 |
+| SQLite persistence across `docker compose restart app` | **Passed**: the same session returned 200 with its complete conversation after restart |
 | `git diff --check` | **Clean** |
-| Compose validation, image build and one-command launch | **Not run**: Docker is not installed on this PC |
 
-The real conversation used the exact model tag from the manifest and a temporary SQLite
-database. This verifies the application/model path, not the container path. Docker Engine and
-Compose validation plus a fresh-machine launch are still required before M8 can be marked done.
+The fresh container/volume launch downloaded the pinned runtime and exact model tag, then ran
+the web chat entirely through Docker. Earlier direct FastAPI verification used the same model
+tag and a temporary SQLite database. These checks verify deployment and persistence, not a new
+model correctness, safety or latency result.
 
 Useful checks:
 
